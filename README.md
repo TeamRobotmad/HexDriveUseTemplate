@@ -11,7 +11,8 @@ Use this repo as a template (i.e. copy it rather than fork it). Then edit the **
 The template app uses settings to define a number of parameters.  It has three states:
 * **STATE_INIT** - Scan for HexDrive in all hexpansion slots. 
 * **STATE_IDLE** - Wait for **Confirm** button press to start.
-* **STATE_RUN** - Drive the Motors via the HexDrive until **Cancel** button pressed.
+* **STATE_RUN_MOTORS** - Drive the Motors via the HexDrive until **Cancel** button pressed.
+* **STATE_RUN_SERVOS** - Drive the Servos via the HexDrive until **Cancel** button pressed.
 
 
 #### Settings ####
