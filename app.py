@@ -55,7 +55,8 @@ class myHexDriveApp(app.App):
                                 HexDriveType(0xCBCA, motors=2, name="2 Motor"), 
                                 HexDriveType(0xCBCC, servos=4, name="4 Servo"), 
                                 HexDriveType(0xCBCD, motors=1, servos=2, name = "1 Mot 2 Srvo")] 
-        self.hexdrive_type = None         
+        self.hexdrive_type = None
+        self.hexdrive_power = False         
         self.motor_target_output = None          # the output power we are aiming for each motor
         self._motor_current_output = (0,0)       # the current output power for each motor - updated in background task DO NOT MODIFY DIRECTLY
         self.servo_target_position = None        # the target position we are aiming for each servo
@@ -104,17 +105,18 @@ class myHexDriveApp(app.App):
             # to avoid sudden changes in ouput which the badge may not be 
             # able to supply enough current for.
             new_output = [0]*self._HEXDRIVE_TYPES[self.hexdrive_type].motors
-            for i in range(self._HEXDRIVE_TYPES[self.hexdrive_type].motors):
-                if self.motor_target_output is not None:
-                    target_output = self.motor_target_output[i]
-                else:
-                    target_output = 0
-                if self._motor_current_output[i] < target_output:
-                    new_output[i] = min(self._motor_current_output[i] + self._settings['acceleration'].v, target_output)
-                elif self._motor_current_output[i] > target_output:
-                    new_output[i] = max(self._motor_current_output[i] - self._settings['acceleration'].v, target_output)
-                else:
-                    new_output[i] = target_output
+            if self.hexdrive_power:
+                for i in range(self._HEXDRIVE_TYPES[self.hexdrive_type].motors):
+                    if self.motor_target_output is not None:
+                        target_output = self.motor_target_output[i]
+                    else:
+                        target_output = 0
+                    if self._motor_current_output[i] < target_output:
+                        new_output[i] = min(self._motor_current_output[i] + self._settings['acceleration'].v, target_output)
+                    elif self._motor_current_output[i] > target_output:
+                        new_output[i] = max(self._motor_current_output[i] - self._settings['acceleration'].v, target_output)
+                    else:
+                        new_output[i] = target_output
             self._motor_current_output = tuple(new_output)
             if self.hexdrive_app is not None:
                 # update the HexDrive
@@ -170,6 +172,7 @@ class myHexDriveApp(app.App):
         # Turn On the HexDrive Boost Converter
         print("Turning on HexDrive Boost Converter")
         self.hexdrive_app.set_power(True)
+        self.hexdrive_power = True
 
 
     def hexdrive_initialise_servos(self):
@@ -193,6 +196,7 @@ class myHexDriveApp(app.App):
         # Turn On the HexDrive Boost Converter
         print("Turning on HexDrive Boost Converter")
         self.hexdrive_app.set_power(True)
+        self.hexdrive_power = True
 
 
     def hexdrive_shutdown(self):
@@ -215,6 +219,8 @@ class myHexDriveApp(app.App):
         # Turn Off the HexDrive Boost Converter
         print("Turning off HexDrive Boost Converter")
         self.hexdrive_app.set_power(False)
+        self.hexdrive_power = False
+
 
 
     def update_settings(self):
